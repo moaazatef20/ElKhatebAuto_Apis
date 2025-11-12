@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/user');
 
 /**
  * @desc    جلب كل العملاء (للأدمن فقط)

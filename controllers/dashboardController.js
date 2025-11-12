@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const Car = require('../models/Car');
+const User = require('../models/user');
+const Car = require('../models/car');
 const InstallmentRequest = require('../models/InstallmentRequest');
 const SellRequest = require('../models/SellRequest');
 

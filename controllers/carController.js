@@ -1,4 +1,4 @@
-const Car = require('../models/Car'); // استدعاء موديل السيارة
+const Car = require('../models/car'); // استدعاء موديل السيارة
 
 /**
  * @desc    إضافة سيارة جديدة (للأدمن فقط)

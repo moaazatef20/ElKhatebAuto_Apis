@@ -1,4 +1,4 @@
-const User = require('../models/User'); // استدعاء موديل اليوزر
+const User = require('../models/user'); // استدعاء موديل اليوزر
 const bcrypt = require('bcryptjs'); // استدعاء مكتبة التشفير
 const jwt = require('jsonwebtoken'); // استدعاء مكتبة التوكن
 
