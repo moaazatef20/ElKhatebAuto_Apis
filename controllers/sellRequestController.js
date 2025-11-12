@@ -1,4 +1,4 @@
-const SellRequest = require('../models/SellRequest');
+const SellRequest = require('../models/sellRequest');
 const jwt = require('jsonwebtoken');
 
 /**

@@ -1,7 +1,7 @@
 const User = require('../models/user');
 const Car = require('../models/car');
-const InstallmentRequest = require('../models/InstallmentRequest');
-const SellRequest = require('../models/SellRequest');
+const InstallmentRequest = require('../models/installmentRequest');
+const SellRequest = require('../models/sellRequest');
 
 /**
  * @desc    جلب إحصائيات لوحة التحكم (للأدمن فقط)

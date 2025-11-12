@@ -1,4 +1,4 @@
-const InstallmentRequest = require('../models/InstallmentRequest');
+const InstallmentRequest = require('../models/installmentRequest');
 const jwt = require('jsonwebtoken');
 
 /**
