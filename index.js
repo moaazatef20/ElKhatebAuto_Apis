@@ -8,6 +8,9 @@ const app = express();
 
 // Middleware عشان السيرفر يفهم الـ JSON اللي هيجيله في الـ requests
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:3000' 
+}));
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/cars', require('./routes/cars'));
 app.use('/api/v1/requests', require('./routes/installmentRequests'));
