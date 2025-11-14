@@ -1,15 +1,17 @@
 const cloudinary = require('cloudinary').v2;
-const CloudinaryStorage = require('multer-storage-cloudinary'); // <-- السطر ده اتصلح
+const CloudinaryStorage = require('multer-storage-cloudinary');
 const multer = require('multer');
-require('dotenv').config();
 
+// --- 🔽 [اختبار مؤقت] 🔽 ---
+// إحنا كتبنا المفاتيح يدوياً هنا للتجربة
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  cloud_name: 'dpoerbowm',
+  api_key: '835959723153386',
+  api_secret: 'rUJIyNzZbGNkQN9SSwwZ7OIVIA2c'
 });
+// --- 🔼 [نهاية الاختبار] 🔼 ---
 
-const storage = new CloudinaryStorage({ // <-- السطر ده هيشتغل دلوقتي
+const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'CarDealership',
