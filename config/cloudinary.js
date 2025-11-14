@@ -1,5 +1,5 @@
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const CloudinaryStorage = require('multer-storage-cloudinary'); // <-- السطر ده اتصلح
 const multer = require('multer');
 require('dotenv').config();
 
@@ -9,7 +9,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const storage = new CloudinaryStorage({
+const storage = new CloudinaryStorage({ // <-- السطر ده هيشتغل دلوقتي
   cloudinary: cloudinary,
   params: {
     folder: 'CarDealership',
