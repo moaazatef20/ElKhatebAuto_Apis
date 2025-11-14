@@ -4,27 +4,30 @@ const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
 
-// --- [المنطق الجديد] ---
 // 1. فك تشفير الـ Key من Base64
 const key_base64 = process.env.GCS_KEYFILE_BASE64;
-
-if (!key_base64) {
-  throw new Error('متغير GCS_KEYFILE_BASE64 غير موجود أو فارغ.');
-}
-
 const key_json_string = Buffer.from(key_base64, 'base64').toString('utf-8');
 const credentials = JSON.parse(key_json_string);
 
-// 2. إعدادات Storage
+// --- 🔽 [التعديل الأخير] 🔽 ---
+// 2. إعدادات Storage (هنضيف الـ Project ID بشكل صريح)
 const storage = new Storage({
-  credentials: credentials
+  credentials: credentials,
+  projectId: process.env.GCS_PROJECT_ID // إضافة الـ ID بشكل صريح
 });
-// --- [نهاية المنطق الجديد] ---
+// --- 🔼 [نهاية التعديل] 🔼 ---
 
 const bucketName = process.env.GCS_BUCKET_NAME;
 
+// 3. إضافة "throw error" عشان نتأكد إن المتغيرات اتقرت
+if (!key_base64) {
+  throw new Error('متغير GCS_KEYFILE_BASE64 غير موجود أو فارغ.');
+}
 if (!bucketName) {
   throw new Error('متغير GCS_BUCKET_NAME غير موجود أو فارغ.');
+}
+if (!process.env.GCS_PROJECT_ID) {
+  throw new Error('متغير GCS_PROJECT_ID غير موجود أو فارغ.');
 }
 
 const bucket = storage.bucket(bucketName);
@@ -51,6 +54,15 @@ const upload = multer({
 const uploadToGcs = (req, res, next) => {
   if (!req.files || req.files.length === 0) {
     return next();
+  }
+
+  // نتأكد إن الـ bucket سليم قبل الرفع
+  if (typeof bucket.blob !== 'function') {
+    console.error("الـ Bucket Object بايظ. اتأكد من GCS_BUCKET_NAME.");
+    return res.status(500).json({ 
+      success: false, 
+      message: 'فشل إعداد باقة التخزين' 
+    });
   }
 
   const uploadPromises = req.files.map(file => {
