@@ -2,10 +2,9 @@
 const express = require('express');
 const router = express.Router();
 
-// استدعاء الـ Middleware (الحراس)
 const { protect, authorize } = require('../middleware/authMiddleware');
+const upload = require('../config/cloudinary'); // <-- 1. استدعي الملف الجديد
 
-// استدعاء الـ Controllers (المنطق) - (لسه هنعملها)
 const {
   getCars,
   getCarById,
@@ -14,28 +13,23 @@ const {
   deleteCar
 } = require('../controllers/carController');
 
-// --- المسارات العامة (Public Routes - للجميع) ---
-
-// @desc    جلب كل السيارات المتاحة
-// @route   GET /api/v1/cars
+// ... (مسارات GET زي ما هي)
 router.get('/', getCars);
-
-// @desc    جلب سيارة واحدة بالتفاصيل
-// @route   GET /api/v1/cars/:id
 router.get('/:id', getCarById);
 
-// --- المسارات المحمية (Admin Only Routes) ---
-
+// --- 🔽 تعديل المسار ده 🔽 ---
 // @desc    إضافة سيارة جديدة
 // @route   POST /api/v1/cars
-router.post('/', [protect, authorize('admin')], addCar);
+router.post(
+  '/',
+  [protect, authorize('admin')],
+  upload.array('images', 5), // <-- 2. ضيف الـ Middleware ده
+  addCar
+);
+// --- 🔼 ---
 
-// @desc    تعديل بيانات سيارة
-// @route   PUT /api/v1/cars/:id
+// ... (مسارات PUT و DELETE زي ما هي)
 router.put('/:id', [protect, authorize('admin')], updateCar);
-
-// @desc    مسح سيارة
-// @route   DELETE /api/v1/cars/:id
 router.delete('/:id', [protect, authorize('admin')], deleteCar);
 
 module.exports = router;

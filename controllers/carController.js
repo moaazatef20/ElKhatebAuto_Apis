@@ -1,5 +1,7 @@
 const Car = require('../models/car'); // استدعاء موديل السيارة
 
+// ... (الأكواد التانية بتاعة getCars, getCarById فوق)
+
 /**
  * @desc    إضافة سيارة جديدة (للأدمن فقط)
  * @route   POST /api/v1/cars
@@ -7,32 +9,33 @@ const Car = require('../models/car'); // استدعاء موديل السيار�
  */
 exports.addCar = async (req, res) => {
   try {
-    // 1. ناخد كل بيانات العربية من الـ body بتاع الطلب
-    // الـ Front-end هيبعت (make, model, year, price, description, images)
     const carData = req.body;
+    
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'يجب رفع صورة واحدة على الأقل',
+        data: null
+      });
+    }
 
-    // 2. (اختياري لكن مهم) ممكن نضيف بيانات الأدمن اللي ضاف العربية
-    // بما إن الـ middleware (protect) اشتغل، فإحنا معانا بيانات اليوزر
-    // console.log(req.user.id); // ده الـ ID بتاع الأدمن اللي باعت الطلب
+    const imageUrls = req.files.map(file => file.path);
+    carData.images = imageUrls;
 
-    // 3. ننشئ العربية الجديدة في الداتابيز
     const newCar = await Car.create(carData);
 
-    // 4. نرجع الرد بالنجاح (بالهيكل الموحد بتاعنا)
-    res.status(201).json({ // 201 = Created
+    res.status(201).json({
       success: true,
-      message: 'تم إضافة السيارة بنجاح',
+      message: 'تم إضافة السيارة والصور بنجاح',
       data: newCar
     });
 
   } catch (err) {
-    // 5. لو حصل خطأ (مثلاً مدخلش حقل مطلوب زي السعر)
     console.error(err.message);
     
-    // لو الخطأ بسبب Validation (حقل ناقص مثلاً)
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map(val => val.message);
-      return res.status(400).json({ // 400 = Bad Request
+      return res.status(400).json({
         success: false,
         message: 'بيانات غير مكتملة',
         data: messages.join(', ')
@@ -46,8 +49,8 @@ exports.addCar = async (req, res) => {
     });
   }
 };
-// ... (الكود بتاع addCar موجود فوق)
 
+// ... (باقي الأكواد بتاعة updateCar, deleteCar تحت)
 /**
  * @desc    جلب كل السيارات المتاحة
  * @route   GET /api/v1/cars
