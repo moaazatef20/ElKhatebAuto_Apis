@@ -11,7 +11,9 @@ exports.addCar = async (req, res) => {
   try {
     const carData = req.body;
     
-    if (!req.files || req.files.length === 0) {
+    // --- 🔽 تعديل 🔽 ---
+    // نتأكد إن الصور اترفعت واللينكات موجودة
+    if (!req.publicUrls || req.publicUrls.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'يجب رفع صورة واحدة على الأقل',
@@ -19,8 +21,8 @@ exports.addCar = async (req, res) => {
       });
     }
 
-    const imageUrls = req.files.map(file => file.path);
-    carData.images = imageUrls;
+    carData.images = req.publicUrls; // اللينكات الجديدة من جوجل
+    // --- 🔼 ---
 
     const newCar = await Car.create(carData);
 
