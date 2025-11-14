@@ -1,18 +1,17 @@
+// ./config/cloudinary.js
 const cloudinary = require('cloudinary').v2;
 const CloudinaryStorage = require('multer-storage-cloudinary');
 const multer = require('multer');
+require('dotenv').config();
 
-// --- 🔽 [اختبار مؤقت] 🔽 ---
-// إحنا كتبنا المفاتيح يدوياً هنا للتجربة
 cloudinary.config({
-  cloud_name: 'dpoerbowm',
-  api_key: '835959723153386',
-  api_secret: 'rUJIyNzZbGNkQN9SSwwZ7OIVIA2c'
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
-// --- 🔼 [نهاية الاختبار] 🔼 ---
 
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary: cloudinary, // هنرجع دي زي ما كانت
   params: {
     folder: 'CarDealership',
     allowedFormats: ['jpg', 'png', 'jpeg']
@@ -20,5 +19,4 @@ const storage = new CloudinaryStorage({
 });
 
 const upload = multer({ storage: storage });
-
 module.exports = upload;
