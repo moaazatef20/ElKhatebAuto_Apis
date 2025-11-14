@@ -4,24 +4,22 @@ const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
 
-// --- [الكود بدون Base64] ---
-// 1. اقرأ محتوى المتغير (اللي هو المفروض ملف الـ JSON)
-const keyFileContent = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+// --- [المنطق الجديد] ---
+// 1. فك تشفير الـ Key من Base64
+const key_base64 = process.env.GCS_KEYFILE_BASE64;
 
-// 2. اتأكد إنه مش فاضي
-if (!keyFileContent) {
-  throw new Error('متغير GOOGLE_APPLICATION_CREDENTIALS غير موجود أو فارغ.');
+if (!key_base64) {
+  throw new Error('متغير GCS_KEYFILE_BASE64 غير موجود أو فارغ.');
 }
 
-// 3. حوله من "نص" لـ "JSON"
-const credentials = JSON.parse(keyFileContent);
+const key_json_string = Buffer.from(key_base64, 'base64').toString('utf-8');
+const credentials = JSON.parse(key_json_string);
 
-// 4. إعدادات Storage
+// 2. إعدادات Storage
 const storage = new Storage({
-  credentials: credentials,
-  projectId: credentials.project_id // بنقرأ الـ ID من الملف نفسه
+  credentials: credentials
 });
-// --- [نهاية الكود] ---
+// --- [نهاية المنطق الجديد] ---
 
 const bucketName = process.env.GCS_BUCKET_NAME;
 
