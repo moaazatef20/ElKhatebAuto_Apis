@@ -156,3 +156,58 @@ exports.updateInstallmentRequestStatus = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    تصدير الطلبات (Pending) كملف CSV
+ * @route   GET /api/v1/requests/export/pending-csv
+ * @access  Private (Admin)
+ */
+exports.exportPendingRequests = async (req, res) => {
+  try {
+    // 1. جلب الطلبات الـ Pending فقط
+    const requests = await InstallmentRequest.find({ status: 'pending' })
+      .populate('userId', 'username email')
+      .populate('carId', 'make model year price')
+      .lean();
+
+    if (requests.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'لا توجد طلبات قيد المراجعة (Pending) لتصديرها',
+        data: null
+      });
+    }
+
+    // 2. تحديد الحقول (الأعمدة) اللي عايزينها في ملف الـ CSV
+    const fields = [
+      { label: 'اسم العميل', value: 'applicantName' },
+      { label: 'رقم الهاتف', value: 'applicantPhone' },
+      { label: 'العنوان', value: 'address' },
+      { label: 'نوع العمل', value: 'workType' },
+      { label: 'المقدم', value: 'downPayment' },
+      { label: 'حالة الطلب', value: 'status' },
+      { label: 'تاريخ الطلب', value: 'createdAt' },
+      { label: 'السيارة المطلوبة', value: 'carId.model' },
+      { label: 'ايميل المستخدم', value: 'userId.email' }
+    ];
+
+    // 3. تحويل الـ JSON لـ CSV
+    const json2csvParser = new Parser({ fields, excelStrings: true });
+    const csv = json2csvParser.parse(requests);
+
+    // 4. إعداد الـ Headers عشان المتصفح يفهم إنه ملف تحميل
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=pending_requests.csv');
+
+    // 5. إرسال الملف
+    res.status(200).send(csv);
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: 'حدث خطأ في السيرفر أثناء تحضير الملف',
+      data: null
+    });
+  }
+};
