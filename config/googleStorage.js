@@ -4,18 +4,31 @@ const multer = require('multer');
 const path = require('path');
 require('dotenv').config();
 
-// 1. فك تشفير الـ Key من Base64
-const key_base64 = process.env.GCS_KEYFILE_BASE64;
-const key_json_string = Buffer.from(key_base64, 'base64').toString('utf-8');
-const credentials = JSON.parse(key_json_string);
+// --- [الكود بدون Base64] ---
+// 1. اقرأ محتوى المتغير (اللي هو المفروض ملف الـ JSON)
+const keyFileContent = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
-// 2. إعدادات Storage (بدون الـ Project ID الزيادة)
+// 2. اتأكد إنه مش فاضي
+if (!keyFileContent) {
+  throw new Error('متغير GOOGLE_APPLICATION_CREDENTIALS غير موجود أو فارغ.');
+}
+
+// 3. حوله من "نص" لـ "JSON"
+const credentials = JSON.parse(keyFileContent);
+
+// 4. إعدادات Storage
 const storage = new Storage({
-  credentials: credentials
+  credentials: credentials,
+  projectId: credentials.project_id // بنقرأ الـ ID من الملف نفسه
 });
-// --- [نهاية التعديل] ---
+// --- [نهاية الكود] ---
 
 const bucketName = process.env.GCS_BUCKET_NAME;
+
+if (!bucketName) {
+  throw new Error('متغير GCS_BUCKET_NAME غير موجود أو فارغ.');
+}
+
 const bucket = storage.bucket(bucketName);
 
 const multerStorage = multer.memoryStorage();
@@ -44,7 +57,7 @@ const uploadToGcs = (req, res, next) => {
 
   const uploadPromises = req.files.map(file => {
     return new Promise((resolve, reject) => {
-      const blob = bucket.blob(`cars/${Date.now()}-${file.originalname}`); // <-- الخطأ كان هنا
+      const blob = bucket.blob(`cars/${Date.now()}-${file.originalname}`);
       const blobStream = blob.createWriteStream({
         resumable: false,
         metadata: {
@@ -71,7 +84,7 @@ const uploadToGcs = (req, res, next) => {
       next();
     })
     .catch(err => {
-      console.error(err); // <-- ده هيطبع الخطأ الحقيقي لو فشل
+      console.error(err);
       res.status(500).json({ 
         success: false, 
         message: 'فشل رفع الصور إلى Google Storage' 
