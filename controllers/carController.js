@@ -9,26 +9,31 @@ const Car = require('../models/car'); // استدعاء موديل السيار�
  */
 exports.addCar = async (req, res) => {
   try {
-    const carData = req.body;
-    
-    // --- 🔽 تعديل 🔽 ---
-    // نتأكد إن الصور اترفعت واللينكات موجودة
-    if (!req.publicUrls || req.publicUrls.length === 0) {
+    // --- 🔽 رجعنا نقرأ كل حاجة من الـ body 🔽 ---
+    const { make, model, year, price, description, images } = req.body;
+
+    // نتأكد إن اللينكات جاتلنا
+    if (!images || images.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'يجب رفع صورة واحدة على الأقل',
+        message: 'يجب رفع صورة واحدة على الأقل (اللينك بتاعها)',
         data: null
       });
     }
 
-    carData.images = req.publicUrls; // اللينكات الجديدة من جوجل
+    const newCar = await Car.create({
+      make,
+      model,
+      year,
+      price,
+      description,
+      images // بنحفظ اللينكات اللي جاتلنا
+    });
     // --- 🔼 ---
-
-    const newCar = await Car.create(carData);
 
     res.status(201).json({
       success: true,
-      message: 'تم إضافة السيارة والصور بنجاح',
+      message: 'تم إضافة السيارة بنجاح',
       data: newCar
     });
 
