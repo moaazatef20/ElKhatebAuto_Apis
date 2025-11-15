@@ -1,6 +1,4 @@
-const Car = require('../models/car'); // استدعاء موديل السيارة
-
-// ... (الأكواد التانية بتاعة getCars, getCarById فوق)
+const Car = require('../models/car');
 
 /**
  * @desc    إضافة سيارة جديدة (للأدمن فقط)
@@ -9,10 +7,8 @@ const Car = require('../models/car'); // استدعاء موديل السيار�
  */
 exports.addCar = async (req, res) => {
   try {
-    // --- 🔽 رجعنا نقرأ كل حاجة من الـ body 🔽 ---
     const { make, model, year, price, description, images } = req.body;
 
-    // نتأكد إن اللينكات جاتلنا
     if (!images || images.length === 0) {
       return res.status(400).json({
         success: false,
@@ -27,9 +23,8 @@ exports.addCar = async (req, res) => {
       year,
       price,
       description,
-      images // بنحفظ اللينكات اللي جاتلنا
+      images
     });
-    // --- 🔼 ---
 
     res.status(201).json({
       success: true,
@@ -57,19 +52,21 @@ exports.addCar = async (req, res) => {
   }
 };
 
-// ... (باقي الأكواد بتاعة updateCar, deleteCar تحت)
 /**
- * @desc    جلب كل السيارات المتاحة
+ * @desc    جلب كل السيارات (المتاحة والمباعة)
  * @route   GET /api/v1/cars
  * @access  Public
  */
 exports.getCars = async (req, res) => {
   try {
-    const cars = await Car.find({ isAvailable: true }).sort({ createdAt: -1 });
+    // --- [ 🔽 هذا هو التعديل 🔽 ] ---
+    // شيلنا الفلتر عشان نجيب كل العربيات
+    const cars = await Car.find({}).sort({ createdAt: -1 });
+    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
     res.status(200).json({
       success: true,
-      message: 'تم جلب جميع السيارات المتاحة بنجاح',
+      message: 'تم جلب جميع السيارات بنجاح',
       data: cars
     });
   } catch (err) {
