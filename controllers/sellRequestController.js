@@ -1,5 +1,6 @@
 const SellRequest = require('../models/sellRequest');
 const jwt = require('jsonwebtoken');
+const { Parser } = require('json2csv'); // <-- [ 1. تم إضافة هذا السطر]
 
 /**
  * @desc    إرسال طلب بيع سيارة (للزائر أو المستخدم)
@@ -126,6 +127,61 @@ exports.updateSellRequestStatus = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'حدث خطأ في السيرفر',
+      data: null
+    });
+  }
+};
+
+// --- 🔽 [ 2. تم إضافة هذه الـ Function بالكامل] 🔽 ---
+
+/**
+ * @desc    تصدير عروض البيع (Pending) كملف CSV
+ * @route   GET /api/v1/sell-requests/export/pending-csv
+ * @access  Private (Admin)
+ */
+exports.exportSellRequests = async (req, res) => {
+  try {
+    const requests = await SellRequest.find({ status: 'pending' })
+      .populate('userId', 'username email')
+      .lean();
+
+    if (requests.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'لا توجد عروض بيع قيد المراجعة (Pending) لتصديرها',
+        data: null
+      });
+    }
+
+    // تحديد الحقول (الأعمدة)
+    const fields = [
+      { label: 'اسم البائع', value: 'sellerName' },
+      { label: 'هاتف البائع', value: 'sellerPhone' },
+      { label: 'ماركة السيارة', value: 'make' },
+      { label: 'موديل السيارة', value: 'model' },
+      { label: 'سنة الصنع', value: 'year' },
+      { label: 'الحالة', value: 'condition' },
+      { label: 'السعر المطلوب', value: 'askingPrice' },
+      { label: 'تاريخ العرض', value: 'createdAt' },
+      { label: 'ايميل المستخدم', value: 'userId.email' }
+    ];
+
+    // تحويل الـ JSON لـ CSV
+    const json2csvParser = new Parser({ fields, excelStrings: true });
+    const csv = json2csvParser.parse(requests);
+
+    // إعداد الـ Headers
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=pending_sell_requests.csv');
+
+    // إرسال الملف
+    res.status(200).send(csv);
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: 'حدث خطأ في السيرفر أثناء تحضير الملف',
       data: null
     });
   }

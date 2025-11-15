@@ -7,23 +7,24 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 const {
   submitSellRequest,
   getSellRequests,
-  updateSellRequestStatus
-} = require('../controllers/sellRequestController'); // (لسه هنعمله)
+  updateSellRequestStatus,
+  exportSellRequests // <-- 1. ضيف الـ Controller الجديد هنا
+} = require('../controllers/sellRequestController');
 
-// --- المسار العام (Public Route) ---
+router.post('/', submitSellRequest);
 
-// @desc    إرسال طلب بيع سيارة (للزائر أو المستخدم)
-// @route   POST /api/v1/sell-requests
-router.post('/', submitSellRequest); // مفتوح للجميع
-
-// --- المسارات المحمية (Admin Only Routes) ---
-
-// @desc    جلب كل طلبات بيع السيارات (للأدمن)
-// @route   GET /api/v1/sell-requests
 router.get('/', [protect, authorize('admin')], getSellRequests);
 
-// @desc    تعديل حالة طلب بيع (قبول/رفض/مراجعة)
-// @route   PUT /api/v1/sell-requests/:id/status
 router.put('/:id/status', [protect, authorize('admin')], updateSellRequestStatus);
+
+// --- 🔽 أضف المسار الجديد ده 🔽 ---
+// @desc    تصدير عروض البيع (Pending) كملف CSV
+// @route   GET /api/v1/sell-requests/export/pending-csv
+router.get(
+  '/export/pending-csv',
+  [protect, authorize('admin')],
+  exportSellRequests
+);
+// --- 🔼 ---
 
 module.exports = router;
