@@ -211,3 +211,53 @@ exports.exportPendingRequests = async (req, res) => {
     });
   }
 };
+/**
+ * @desc    إضافة أو تعديل ملاحظات الأدمن على طلب
+ * @route   PUT /api/v1/requests/:id/notes
+ * @access  Private (Admin)
+ */
+exports.addInstallmentRequestNote = async (req, res) => {
+  try {
+    const { notes } = req.body;
+    const requestId = req.params.id;
+
+    // 1. نتأكد إن الـ notes جاية (حتى لو فاضية)
+    if (notes === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'الرجاء إرسال حقل الملاحظات (notes)',
+        data: null
+      });
+    }
+
+    // 2. ندور على الطلب
+    let request = await InstallmentRequest.findById(requestId);
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: 'لم يتم العثور على الطلب',
+        data: null
+      });
+    }
+
+    // 3. نحدث الملاحظة ونحفظ
+    request.notes = notes;
+    await request.save();
+
+    // 4. نرجع الرد بالنجاح
+    res.status(200).json({
+      success: true,
+      message: 'تم حفظ الملاحظات بنجاح',
+      data: request
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: 'حدث خطأ في السيرفر',
+      data: null
+    });
+  }
+};

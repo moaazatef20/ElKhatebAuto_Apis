@@ -45,6 +45,11 @@ const InstallmentRequestSchema = new Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending' // الطلب أول ما يتبعت بيكون "قيد المراجعة"
   },
+
+  notes: {
+    type: String,
+    default: '' // قيمة افتراضية (نص فاضي)
+  },
   
   // --- بيانات العربية المطلوبة (النقطة المهمة اللي طلبتها) ---
   carId: {
