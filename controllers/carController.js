@@ -86,7 +86,7 @@ exports.getCars = async (req, res) => {
  */
 exports.getCarById = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+  const car = await Car.findOne({ _id: req.params.id });
 
     if (!car) {
       return res.status(404).json({
@@ -130,8 +130,7 @@ exports.updateCar = async (req, res) => {
     const carId = req.params.id;
     const updates = req.body;
 
-    let car = await Car.findById(carId);
-
+  let car = await Car.findOne({ _id: carId });
     if (!car) {
       return res.status(404).json({
         success: false,
@@ -176,7 +175,7 @@ exports.updateCar = async (req, res) => {
  */
 exports.deleteCar = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+  const car = await Car.findOne({ _id: req.params.id });
 
     if (!car) {
       return res.status(404).json({
