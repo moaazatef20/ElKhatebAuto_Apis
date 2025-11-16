@@ -165,10 +165,10 @@ exports.updateInstallmentRequestStatus = async (req, res) => {
  */
 exports.exportPendingRequests = async (req, res) => {
   try {
-    // 1. جلب الطلبات الـ Pending فقط
+    // [1. تعديل] جبنا 'make' و 'model' عشان نظهرهم
     const requests = await InstallmentRequest.find({ status: 'pending' })
       .populate('userId', 'username email')
-      .populate('carId', 'make model year price')
+      .populate('carId', 'make model') 
       .lean();
 
     if (requests.length === 0) {
@@ -179,7 +179,45 @@ exports.exportPendingRequests = async (req, res) => {
       });
     }
 
-    // 2. تحديد الحقول (الأعمدة) اللي عايزينها في ملف الـ CSV
+    // --- [ 2. تعديل] ---
+    // هنعمل "تجهيز" للداتا قبل ما نحولها
+    const formattedData = requests.map(req => {
+      let carDescription = 'N/A';
+      
+      // هنا بنشوف لو العربية جاية من الموقع ولا العميل كاتبها
+      if (req.carId && req.carId.make) {
+        carDescription = `${req.carId.make} ${req.carId.model}`;
+      } else if (req.customCarDescription) {
+        carDescription = req.customCarDescription; // <-- دي اللي كانت ناقصة
+      }
+
+      // هنا بنظبط صيغة التاريخ والوقت
+      const formattedDate = new Date(req.createdAt).toLocaleString('ar-EG-u-nu-latn', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      // بنرجع "صف" جديد جاهز للـ CSV
+      return {
+        applicantName: req.applicantName,
+        applicantPhone: req.applicantPhone,
+        address: req.address,
+        workType: req.workType,
+        downPayment: req.downPayment,
+        status: req.status,
+        formattedDate: formattedDate, // <-- التاريخ المتعدل
+        carDescription: carDescription, // <-- السيارة المتعدلة
+        userEmail: req.userId ? req.userId.email : 'زائر'
+      };
+    });
+    // --- [نهاية التعديل] ---
+
+
+    // 3. تحديد الحقول (الأعمدة) الجديدة
     const fields = [
       { label: 'اسم العميل', value: 'applicantName' },
       { label: 'رقم الهاتف', value: 'applicantPhone' },
@@ -187,21 +225,22 @@ exports.exportPendingRequests = async (req, res) => {
       { label: 'نوع العمل', value: 'workType' },
       { label: 'المقدم', value: 'downPayment' },
       { label: 'حالة الطلب', value: 'status' },
-      { label: 'تاريخ الطلب', value: 'createdAt' },
-      { label: 'السيارة المطلوبة', value: 'carId.model' },
-      { label: 'ايميل المستخدم', value: 'userId.email' }
+      { label: 'تاريخ الطلب', value: 'formattedDate' },
+      { label: 'السيارة المطلوبة', value: 'carDescription' },
+      { label: 'ايميل المستخدم', value: 'userEmail' }
     ];
 
-    // 3. تحويل الـ JSON لـ CSV
+    // 4. تحويل الداتا الجديدة لـ CSV
     const json2csvParser = new Parser({ fields, excelStrings: true });
-    const csv = json2csvParser.parse(requests);
+    const csv = json2csvParser.parse(formattedData);
 
-    // 4. إعداد الـ Headers عشان المتصفح يفهم إنه ملف تحميل
-    res.setHeader('Content-Type', 'text/csv');
+    // 5. إعداد الـ Headers
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename=pending_requests.csv');
-
-    // 5. إرسال الملف
-    res.status(200).send(csv);
+    
+    // 6. إرسال الملف (مع BOM عشان يدعم العربي في Excel)
+    const csvWithBom = '\uFEFF' + csv;
+    res.status(200).send(csvWithBom);
 
   } catch (err) {
     console.error(err.message);
