@@ -7,9 +7,13 @@ const Car = require('../models/car');
  */
 exports.addCar = async (req, res) => {
   try {
-    const { make, model, year, price, description, images } = req.body;
+    // --- [ 🔽 التعديل هنا 🔽 ] ---
+    // هناخد كل البيانات اللي جاية من الـ Front-end مرة واحدة
+    const carData = req.body; 
+    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
-    if (!images || images.length === 0) {
+    // نتأكد إن اللينكات جاتلنا (زي ما هي)
+    if (!carData.images || carData.images.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'يجب رفع صورة واحدة على الأقل (اللينك بتاعها)',
@@ -17,14 +21,11 @@ exports.addCar = async (req, res) => {
       });
     }
 
-    const newCar = await Car.create({
-      make,
-      model,
-      year,
-      price,
-      description,
-      images
-    });
+    // --- [ 🔽 التعديل هنا 🔽 ] ---
+    // هنسيف كل الداتا مرة واحدة
+    // الموديل هيختار الحقول اللي هو عارفها (make, model, color, ...إلخ)
+    const newCar = await Car.create(carData);
+    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
     res.status(201).json({
       success: true,

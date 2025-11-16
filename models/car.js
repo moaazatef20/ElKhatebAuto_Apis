@@ -12,6 +12,19 @@ const CarSchema = new mongoose.Schema({
     required: [true, 'الرجاء إدخال موديل السيارة'],
     trim: true
   },
+  color: {
+    type: String,
+    required: [true, 'الرجاء إدخال لون السيارة']
+  },
+  category: {
+    type: String,
+    required: [true, 'الرجاء إدخال فئة السيارة (مثل: سيدان، دفع رباعي...)']
+  },
+  transmission: {
+    type: String,
+    required: [true, 'الرجاء إدخال نوع ناقل الحركة'],
+    enum: ['automatic', 'manual'] // (أوتوماتيك أو يدوي)
+  },
   year: {
     type: Number,
     required: [true, 'الرجاء إدخال سنة الصنع']
