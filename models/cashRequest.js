@@ -1,6 +1,6 @@
 // ./models/cashRequest.js
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema; // <-- [إضافة] هنحتاجه عشان الـ ID
 
 const CashRequestSchema = new mongoose.Schema({
   senderName: {
@@ -16,7 +16,7 @@ const CashRequestSchema = new mongoose.Schema({
     required: [true, 'الرجاء اختيار المحافظة'],
     enum: [
       'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'الشرقية', 'المنوفية',
-      'القليوبية', 'البحيرة', 'الغربية', 'بورسعيد', 'دمياط', 'الإسماع промышленный',
+      'القليوبية', 'البحيرة', 'الغربية', 'بورسعيد', 'دمياط', 'الإسماعيلية',
       'السويس', 'كفر الشيخ', 'الفيوم', 'بني سويف', 'المنيا', 'أسيوط',
       'سوهاج', 'قنا', 'الأقصر', 'أسوان', 'البحر الأحمر', 'الوادي الجديد',
       'مطروح', 'شمال سيناء', 'جنوب سيناء'
@@ -35,6 +35,7 @@ const CashRequestSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+
   status: {
     type: String,
     enum: ['new', 'contacted', 'completed'],
