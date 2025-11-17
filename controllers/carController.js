@@ -7,12 +7,8 @@ const Car = require('../models/car');
  */
 exports.addCar = async (req, res) => {
   try {
-    // --- [ 🔽 التعديل هنا 🔽 ] ---
-    // هناخد كل البيانات اللي جاية من الـ Front-end مرة واحدة
     const carData = req.body; 
-    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
-    // نتأكد إن اللينكات جاتلنا (زي ما هي)
     if (!carData.images || carData.images.length === 0) {
       return res.status(400).json({
         success: false,
@@ -21,11 +17,7 @@ exports.addCar = async (req, res) => {
       });
     }
 
-    // --- [ 🔽 التعديل هنا 🔽 ] ---
-    // هنسيف كل الداتا مرة واحدة
-    // الموديل هيختار الحقول اللي هو عارفها (make, model, color, ...إلخ)
     const newCar = await Car.create(carData);
-    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
     res.status(201).json({
       success: true,

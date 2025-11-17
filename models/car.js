@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// تعريف هيكل (Schema) السيارة
 const CarSchema = new mongoose.Schema({
   make: {
     type: String,
@@ -11,6 +10,27 @@ const CarSchema = new mongoose.Schema({
     type: String,
     required: [true, 'الرجاء إدخال موديل السيارة'],
     trim: true
+  },
+  year: {
+    type: Number,
+    required: [true, 'الرجاء إدخال سنة الصنع']
+  },
+  price: {
+    type: Number,
+    required: [true, 'الرجاء إدخال السعر']
+  },
+
+  // --- 🔽 [هنا الحقل الجديد] 🔽 ---
+  minDownPayment: {
+    type: Number,
+    required: false,
+    default: 0
+  },
+  // --- 🔼 ---
+
+  description: {
+    type: String,
+    required: [true, 'الرجاء إدخال وصف للسيارة']
   },
   color: {
     type: String,
@@ -23,40 +43,20 @@ const CarSchema = new mongoose.Schema({
   transmission: {
     type: String,
     required: [true, 'الرجاء إدخال نوع ناقل الحركة'],
-    enum: ['automatic', 'manual'] // (أوتوماتيك أو يدوي)
-  },
-  year: {
-    type: Number,
-    required: [true, 'الرجاء إدخال سنة الصنع']
-  },
-  price: {
-    type: Number,
-    required: [true, 'الرجاء إدخال السعر']
-  },
-  minDownPayment: {
-    type: Number,
-    required: false,
-    default: 0
-  },
-  description: {
-    type: String,
-    required: [true, 'الرجاء إدخال وصف للسيارة']
+    enum: ['automatic', 'manual']
   },
   images: [
     {
-      type: String, // هنخزن هنا لينكات الصور (URLs)
+      type: String, 
       required: true
     }
   ],
   isAvailable: {
     type: Boolean,
-    default: true // أول ما العربية تنضاف، هي افتراضياً "متاحة"
+    default: true
   }
-  // مش محتاجين نربط العربية بالأدمن اللي ضافها (إلا لو حبيت)
-  // لأن كل العربيات تبع المعرض
-
 }, {
-  timestamps: true // عشان نعرف امتى العربية اتضافت أو اتعدلت
+  timestamps: true
 });
 
 module.exports = mongoose.model('Car', CarSchema);
