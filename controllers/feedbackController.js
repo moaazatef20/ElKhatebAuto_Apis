@@ -41,3 +41,29 @@ exports.submitFeedback = async (req, res) => {
     });
   }
 };
+
+
+/**
+ * @desc    جلب كل الشكاوى والمقترحات (للأدمن)
+ * @route   GET /api/v1/feedback
+ * @access  Private (Admin)
+ */
+exports.getFeedback = async (req, res) => {
+  try {
+    const feedbackItems = await Feedback.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: 'تم جلب جميع الشكاوى والمقترحات بنجاح',
+      data: feedbackItems
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: 'حدث خطأ في السيرفر',
+      data: null
+    });
+  }
+};
