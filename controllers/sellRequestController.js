@@ -1,6 +1,6 @@
 const SellRequest = require('../models/sellRequest');
 const jwt = require('jsonwebtoken');
-const { Parser } = require('json2csv'); // <-- [ 1. تم إضافة هذا السطر]
+const { Parser } = require('json2csv'); // <-- (السطر ده موجود زي ما هو)
 
 /**
  * @desc    إرسال طلب بيع سيارة (للزائر أو المستخدم)
@@ -132,7 +132,7 @@ exports.updateSellRequestStatus = async (req, res) => {
   }
 };
 
-// --- 🔽 [ 2. تم إضافة هذه الـ Function بالكامل] 🔽 ---
+// --- 🔽 [ هذا هو الكود المعدل بالكامل ] 🔽 ---
 
 /**
  * @desc    تصدير عروض البيع (Pending) كملف CSV
@@ -153,29 +153,68 @@ exports.exportSellRequests = async (req, res) => {
       });
     }
 
-    // تحديد الحقول (الأعمدة)
+    // [تعديل] تجهيز الداتا قبل التحويل
+    const formattedData = requests.map(req => {
+      // [تعديل] تنسيق التاريخ
+      const formattedDate = new Date(req.createdAt).toLocaleString('ar-EG-u-nu-latn', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      return {
+        sellerName: req.sellerName,
+        sellerPhone: req.sellerPhone,
+        governorate: req.governorate, // <-- [إضافة جديدة]
+        address: req.address, // <-- [إضافة جديدة]
+        licenseExpiryDate: req.licenseExpiryDate, // <-- [إضافة جديدة]
+        make: req.make,
+        model: req.model,
+        year: req.year,
+        mileage: req.mileage, // <-- [إضافة جديدة]
+        color: req.color, // <-- [إضافة جديدة]
+        transmission: req.transmission, // <-- [إضافة جديدة]
+        condition: req.condition,
+        askingPrice: req.askingPrice,
+        formattedDate: formattedDate,
+        userEmail: req.userId ? req.userId.email : 'زائر'
+      };
+    });
+
+
+    // [تعديل] تحديث قائمة الحقول
     const fields = [
+      { label: 'تاريخ العرض', value: 'formattedDate' },
       { label: 'اسم البائع', value: 'sellerName' },
       { label: 'هاتف البائع', value: 'sellerPhone' },
+      { label: 'المحافظة', value: 'governorate' },
+      { label: 'العنوان', value: 'address' },
+      { label: 'تاريخ انتهاء الرخصة', value: 'licenseExpiryDate' },
       { label: 'ماركة السيارة', value: 'make' },
       { label: 'موديل السيارة', value: 'model' },
       { label: 'سنة الصنع', value: 'year' },
+      { label: 'المسافة المقطوعة', value: 'mileage' },
+      { label: 'اللون', value: 'color' },
+      { label: 'ناقل الحركة', value: 'transmission' },
       { label: 'الحالة', value: 'condition' },
       { label: 'السعر المطلوب', value: 'askingPrice' },
-      { label: 'تاريخ العرض', value: 'createdAt' },
-      { label: 'ايميل المستخدم', value: 'userId.email' }
+      { label: 'ايميل المستخدم', value: 'userEmail' }
     ];
 
-    // تحويل الـ JSON لـ CSV
+    // [تعديل] تحويل الداتا المجهزة
     const json2csvParser = new Parser({ fields, excelStrings: true });
-    const csv = json2csvParser.parse(requests);
+    const csv = json2csvParser.parse(formattedData);
 
-    // إعداد الـ Headers
-    res.setHeader('Content-Type', 'text/csv');
+    // [تعديل] إعداد الـ Headers (لدعم اللغة العربية)
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename=pending_sell_requests.csv');
 
-    // إرسال الملف
-    res.status(200).send(csv);
+    // [تعديل] إرسال الملف (مع BOM لدعم العربي في Excel)
+    const csvWithBom = '\uFEFF' + csv;
+    res.status(200).send(csvWithBom);
 
   } catch (err) {
     console.error(err.message);
