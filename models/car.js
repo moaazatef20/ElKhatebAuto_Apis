@@ -33,6 +33,11 @@ const CarSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'الرجاء إدخال السعر']
   },
+  minDownPayment: {
+    type: Number,
+    required: false,
+    default: 0
+  },
   description: {
     type: String,
     required: [true, 'الرجاء إدخال وصف للسيارة']

@@ -16,6 +16,7 @@ app.use('/api/v1/cars', require('./routes/cars'));
 app.use('/api/v1/requests', require('./routes/installmentRequests'));
 app.use('/api/v1/sell-requests', require('./routes/sellRequests'));
 app.use('/api/v1/feedback', require('./routes/feedback'));
+app.use('/api/v1/cash-requests', require('./routes/cashRequest'));
 app.use('/api/v1/users', require('./routes/users'));
 app.use('/api/v1/dashboard', require('./routes/dashboard'));
 app.get('/', (req, res) => {
