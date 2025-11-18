@@ -7,13 +7,10 @@ const Car = require('../models/car');
  */
 exports.addCar = async (req, res) => {
   try {
-    // --- [ 🔽 التعديل هنا 🔽 ] ---
-    // هناخد كل البيانات اللي جاية من الـ Front-end مرة واحدة
-    const carData = req.body; 
-    // --- [ 🔼 نهاية التعديل 🔼 ] ---
+    // --- [ 🔽 رجعنا للطريقة اليدوية (قبل التعديل) 🔽 ] ---
+    const { make, model, year, price, description, images, color, category, transmission } = req.body;
 
-    // نتأكد إن اللينكات جاتلنا (زي ما هي)
-    if (!carData.images || carData.images.length === 0) {
+    if (!images || images.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'يجب رفع صورة واحدة على الأقل (اللينك بتاعها)',
@@ -21,10 +18,17 @@ exports.addCar = async (req, res) => {
       });
     }
 
-    // --- [ 🔽 التعديل هنا 🔽 ] ---
-    // هنسيف كل الداتا مرة واحدة
-    // الموديل هيختار الحقول اللي هو عارفها (make, model, color, ...إلخ)
-    const newCar = await Car.create(carData);
+    const newCar = await Car.create({
+      make,
+      model,
+      year,
+      price,
+      description,
+      images,
+      color,
+      category,
+      transmission
+    });
     // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
     res.status(201).json({
@@ -35,7 +39,6 @@ exports.addCar = async (req, res) => {
 
   } catch (err) {
     console.error(err.message);
-    
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map(val => val.message);
       return res.status(400).json({
@@ -44,7 +47,6 @@ exports.addCar = async (req, res) => {
         data: messages.join(', ')
       });
     }
-
     res.status(500).json({
       success: false,
       message: 'حدث خطأ في السيرفر',
@@ -60,10 +62,7 @@ exports.addCar = async (req, res) => {
  */
 exports.getCars = async (req, res) => {
   try {
-    // --- [ 🔽 هذا هو التعديل 🔽 ] ---
-    // شيلنا الفلتر عشان نجيب كل العربيات
     const cars = await Car.find({}).sort({ createdAt: -1 });
-    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
     res.status(200).json({
       success: true,
@@ -87,7 +86,7 @@ exports.getCars = async (req, res) => {
  */
 exports.getCarById = async (req, res) => {
   try {
-  const car = await Car.findOne({ _id: req.params.id });
+    const car = await Car.findOne({ _id: req.params.id });
 
     if (!car) {
       return res.status(404).json({
@@ -104,7 +103,6 @@ exports.getCarById = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    
     if (err.kind === 'ObjectId') {
       return res.status(404).json({
         success: false,
@@ -112,7 +110,6 @@ exports.getCarById = async (req, res) => {
         data: null
       });
     }
-
     res.status(500).json({
       success: false,
       message: 'حدث خطأ في السيرفر',
@@ -129,9 +126,13 @@ exports.getCarById = async (req, res) => {
 exports.updateCar = async (req, res) => {
   try {
     const carId = req.params.id;
-    const updates = req.body;
+    // --- [ 🔽 رجعنا للطريقة اليدوية (قبل التعديل) 🔽 ] ---
+    // (الطريقة دي كانت أصلاً ذكية، بس إحنا بنأكد إنها مبتجيبش minDownPayment)
+    const updates = req.body; 
+    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
-  let car = await Car.findOne({ _id: carId });
+    let car = await Car.findOne({ _id: carId });
+
     if (!car) {
       return res.status(404).json({
         success: false,
@@ -176,7 +177,7 @@ exports.updateCar = async (req, res) => {
  */
 exports.deleteCar = async (req, res) => {
   try {
-  const car = await Car.findOne({ _id: req.params.id });
+    const car = await Car.findOne({ _id: req.params.id });
 
     if (!car) {
       return res.status(404).json({
