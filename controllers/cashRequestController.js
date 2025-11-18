@@ -42,7 +42,12 @@ exports.submitCashRequest = async (req, res) => {
  */
 exports.getCashRequests = async (req, res) => {
   try {
-    const requests = await CashRequest.find().sort({ createdAt: -1 });
+    // --- [ 🔽 التعديل هنا 🔽 ] ---
+    // ضفنا .populate('carId') عشان يجيب تفاصيل العربية بدل الـ ID بس
+    const requests = await CashRequest.find()
+      .populate('carId') 
+      .sort({ createdAt: -1 });
+    // --- [ 🔼 نهاية التعديل 🔼 ] ---
 
     res.status(200).json({
       success: true,
@@ -59,7 +64,6 @@ exports.getCashRequests = async (req, res) => {
     });
   }
 };
-
 /**
  * @desc    تعديل حالة طلب شراء كاش (للأدمن)
  * @route   PUT /api/v1/cash-requests/:id/status
