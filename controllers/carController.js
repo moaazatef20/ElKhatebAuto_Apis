@@ -1,3 +1,4 @@
+// ./controllers/carController.js
 const Car = require('../models/car');
 
 /**
@@ -7,29 +8,19 @@ const Car = require('../models/car');
  */
 exports.addCar = async (req, res) => {
   try {
-    // --- [ 🔽 رجعنا للطريقة اليدوية (قبل التعديل) 🔽 ] ---
-    const { make, model, year, price, description, images, color, category, transmission } = req.body;
+    // [التعديل الذكي]: هناخد "كل" البيانات اللي جاية في الـ body
+    const carData = req.body;
 
-    if (!images || images.length === 0) {
+    if (!carData.images || carData.images.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'يجب رفع صورة واحدة على الأقل (اللينك بتاعها)',
         data: null
       });
     }
-
-    const newCar = await Car.create({
-      make,
-      model,
-      year,
-      price,
-      description,
-      images,
-      color,
-      category,
-      transmission
-    });
-    // --- [ 🔼 نهاية التعديل 🔼 ] ---
+    
+    // الـ Model هيختار الحقول اللي هو عارفها (بما فيهم minDownPayment)
+    const newCar = await Car.create(carData);
 
     res.status(201).json({
       success: true,
@@ -126,10 +117,8 @@ exports.getCarById = async (req, res) => {
 exports.updateCar = async (req, res) => {
   try {
     const carId = req.params.id;
-    // --- [ 🔽 رجعنا للطريقة اليدوية (قبل التعديل) 🔽 ] ---
-    // (الطريقة دي كانت أصلاً ذكية، بس إحنا بنأكد إنها مبتجيبش minDownPayment)
-    const updates = req.body; 
-    // --- [ 🔼 نهاية التعديل 🔼 ] ---
+    // [التعديل الذكي]: هناخد "كل" التعديلات اللي جاية في الـ body
+    const updates = req.body;
 
     let car = await Car.findOne({ _id: carId });
 
@@ -141,6 +130,7 @@ exports.updateCar = async (req, res) => {
       });
     }
 
+    // الـ Model هو اللي هيختار الحقول اللي هو عارفها (بما فيهم minDownPayment)
     car = await Car.findByIdAndUpdate(carId, updates, {
       new: true,
       runValidators: true

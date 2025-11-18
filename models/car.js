@@ -1,3 +1,4 @@
+// ./models/car.js
 const mongoose = require('mongoose');
 
 const CarSchema = new mongoose.Schema({
@@ -19,7 +20,11 @@ const CarSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'الرجاء إدخال السعر']
   },
-  // (تم مسح minDownPayment من هنا)
+  minDownPayment: { // <-- [الإضافة الجديدة]
+    type: Number,
+    required: false,
+    default: 0
+  },
   description: {
     type: String,
     required: [true, 'الرجاء إدخال وصف للسيارة']
